@@ -4,9 +4,15 @@
 #ifdef HAVE_AL_ALC_H
 #  include <AL/alc.h>
 #  include <AL/al.h>
+#  ifdef HAVE_AL_ALEXT_H
+#    include <AL/alext.h>
+#  endif
 #else
 #  include <OpenAL/alc.h>
 #  include <OpenAL/al.h>
+#  ifdef HAVE_OPENAL_ALEXT_H
+#    include <OpenAL/alext.h>
+#  endif
 #endif
 
 #if DEBUG_H
@@ -374,6 +380,34 @@ static VALUE oa_stream(VALUE self)
   return Qtrue;
 }
 
+static VALUE oa_list_devices(VALUE klass)
+{
+  VALUE device_array = rb_ary_new();
+
+  // Enumerate OpenAL devices
+  if (alcIsExtensionPresent(NULL, "ALC_ENUMERATION_EXT") == AL_TRUE) {
+#if defined(HAVE_AL_ALEXT_H) || defined(HAVE_OPENAL_ALEXT_H)
+    const char *s = (const char *)alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+#else
+    const char *s = (const char *)alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+#endif
+    while (s != NULL && *s != '\0') {
+      rb_ary_push(device_array, rb_str_new2(s));
+      while (*s++ != '\0');
+    }
+  } else {
+    rb_raise(rb_eRuntimeError, "OpenAL device enumeration isn't available.");
+  }
+
+  return device_array;
+}
+
+static VALUE oa_default_device(VALUE klass)
+{
+  const ALCchar *device = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+  return rb_str_new2((const char *)device);
+}
+
 void Init_openal_ext(void)
 {
   VALUE mHallon = rb_const_get(rb_cObject, rb_intern("Hallon"));
@@ -398,4 +432,7 @@ void Init_openal_ext(void)
   rb_define_method(cOpenAL, "format", oa_format_get, 0);
 
   rb_define_method(cOpenAL, "drops", oa_drops, 0);
+
+  rb_define_singleton_method(cOpenAL, "list_devices", oa_list_devices, 0);
+  rb_define_singleton_method(cOpenAL, "default_device", oa_default_device, 0);
 }

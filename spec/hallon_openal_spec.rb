@@ -37,4 +37,17 @@ describe Hallon::OpenAL do
       subject.format.should eq format
     end
   end
+
+  describe ".default_device" do
+    it "should return a string" do
+      klass.default_device.should be_a String
+    end
+  end
+
+  describe ".list_devices" do
+    it "should return an array" do
+      puts klass.list_devices.inspect
+      klass.list_devices.should be_a Array
+    end
+  end
 end

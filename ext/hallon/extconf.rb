@@ -16,8 +16,12 @@ dir_config 'openal'
 
 if have_header('OpenAL/alc.h')
   # yay, probably mac os!
+  # check if we have openal extensions
+  have_header('OpenAL/alext.h')
 elsif have_header('AL/alc.h')
   # woot, probably everybody else!
+  # check if we have openal extensions
+  have_header('AL/alext.h')
 else
   error 'Missing openal headers'
 end
