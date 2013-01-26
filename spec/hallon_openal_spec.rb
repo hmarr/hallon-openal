@@ -46,8 +46,21 @@ describe Hallon::OpenAL do
 
   describe ".list_devices" do
     it "should return an array" do
-      puts klass.list_devices.inspect
       klass.list_devices.should be_a Array
+    end
+  end
+
+  describe '.device' do
+    subject { klass.device }
+
+    context 'by default' do
+      it { should == klass.default_device }
+    end
+
+    context 'when the device has been changed' do
+      let(:device_name) { 'Other Device' }
+      before { klass.device = device_name }
+      it { should == device_name }
     end
   end
 end

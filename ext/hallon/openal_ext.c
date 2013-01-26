@@ -27,6 +27,7 @@
 // Globals
 ID oa_iv_playing;
 ID oa_iv_format;
+ID oa_iv_device;
 ID oa_id_call;
 ID oa_id_puts;
 VALUE oa_key_channels;
@@ -408,6 +409,21 @@ static VALUE oa_default_device(VALUE klass)
   return rb_str_new2((const char *)device);
 }
 
+static VALUE oa_device_get(VALUE self)
+{
+  VALUE device = rb_ivar_get(self, oa_iv_device);
+  if (device == Qnil) {
+    device = rb_funcall(self, rb_intern("default_device"), 0);
+  }
+  return device;
+}
+
+static VALUE oa_device_set(VALUE self, VALUE device)
+{
+  rb_ivar_set(self, oa_iv_device, device);
+  return device;
+}
+
 void Init_openal_ext(void)
 {
   VALUE mHallon = rb_const_get(rb_cObject, rb_intern("Hallon"));
@@ -435,4 +451,6 @@ void Init_openal_ext(void)
 
   rb_define_singleton_method(cOpenAL, "list_devices", oa_list_devices, 0);
   rb_define_singleton_method(cOpenAL, "default_device", oa_default_device, 0);
+  rb_define_singleton_method(cOpenAL, "device=", oa_device_set, 1);
+  rb_define_singleton_method(cOpenAL, "device", oa_device_get, 0);
 }
