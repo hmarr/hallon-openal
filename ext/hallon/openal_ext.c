@@ -148,7 +148,9 @@ static VALUE oa_initialize(VALUE self)
   // initialize openal
   Data_Get_Struct(self, oa_struct_t, data_ptr);
 
-  data_ptr->device = alcOpenDevice(NULL);
+  VALUE klass = rb_funcall(self, rb_intern("class"), 0),
+        device_name = rb_funcall(klass, rb_intern("device"), 0);
+  data_ptr->device = alcOpenDevice(RSTRING_PTR(device_name));
   if ( ! data_ptr->device)
   {
     rb_raise(rb_eRuntimeError, "failed to open device");
